@@ -1,0 +1,17 @@
+{
+    "tasks": {
+        "devas": "deno run --allow-read=test.s --allow-write=a.out as.js test.s",
+        "devds": "deno run --allow-read=a.out --allow-write=a.txt ds.js a.out"
+    },
+    "lint": {
+        "files": {
+          "include": ["as.js", "ds.js"],
+          "exclude": []
+        },
+        "rules": {
+          "tags": ["recommended"],
+          "include": [],
+          "exclude": []
+        }
+    }
+}
