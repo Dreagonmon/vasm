@@ -127,7 +127,7 @@ const readOptions = (data, initOffset) => {
 
 const processFile = async (file, out) => {
     const data = await Deno.readFile(file);
-    const f = await Deno.open(out, { write: true, create: true });
+    const f = await Deno.open(out, { write: true, create: true, truncate: true });
     const encoder = new TextEncoder();
     let pc = 0;
     while (pc < data.length) {

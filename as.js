@@ -554,7 +554,7 @@ const processLabels = (instructions) => {
  * @param {string} file
  */
 const writeToFile = async (instructions, file) => {
-    const f = await Deno.open(file, { write: true, create: true });
+    const f = await Deno.open(file, { write: true, create: true, truncate: true });
     for (const ainst of instructions) {
         await f.write(ainst.getBytes());
     }
