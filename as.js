@@ -473,7 +473,7 @@ const process_line = (text, instructions) => {
  * @param {string} file_content 
  * @param {Array<Instruction>} instructions 
  */
-const processFileContent = (file_content, instructions) => {
+export const processFileContent = (file_content, instructions) => {
     const eLineNum = [];
     const eError = [];
     let hasError = false;
@@ -505,7 +505,7 @@ const processFileContent = (file_content, instructions) => {
  * process registers
  * @param {Array<Instruction>} instructions 
  */
-const processRegisters = (instructions) => {
+export const processRegisters = (instructions) => {
     // update default registers
     for (const reg in SPECIAL_REGISTERS) {
         instructions.forEach((ainst) => {
@@ -547,7 +547,7 @@ const processRegisters = (instructions) => {
  * process labels
  * @param {Array<Instruction>} instructions 
  */
-const processLabels = (instructions) => {
+export const processLabels = (instructions) => {
     let offset = 0;
     instructions.forEach((inst) => {
         if (inst instanceof InstLabel) {
@@ -561,6 +561,75 @@ const processLabels = (instructions) => {
             throw new Error("Too many instructions.");
         }
     });
+};
+
+/**
+ * process labels
+ * @param {Array<Instruction>} instructions 
+ * @returns {Uint8Array}
+ */
+export const buildBinary = (instructions) => {
+    const parts = [];
+    let len = 0;
+    for (const ainst of instructions) {
+        const part = ainst.getBytes();
+        len += part.length;
+        parts.push(part);
+    }
+    const data = new Uint8Array(len);
+    len = 0;
+    for (const part of parts) {
+        data.set(part, len);
+        len += part.length;
+    }
+    return data;
+}
+
+/**
+ * get all labels
+ * @param {Array<Instruction>} instructions
+ * @returns {Array<string>}
+ */
+export const getAllLabels = (instructions) => {
+    const labels = new Set();
+    instructions.forEach((inst) => {
+        if (inst instanceof InstLabel) {
+            // update all label position
+            labels.add(inst.label);
+        }
+    });
+    const list = [];
+    for (const label of labels) {
+        list.push(label);
+    }
+    return list;
+};
+
+/**
+ * get all registers
+ * @param {Array<Instruction>} instructions
+ * @returns {Array<string>}
+ */
+export const getAllRegisters = (instructions) => {
+    const regs = new Set();
+    for (const reg in SPECIAL_REGISTERS) {
+        regs.add(reg);
+    }
+    instructions.forEach((inst) => {
+        for (let reg of inst.getRegisters()) {
+            if (reg.startsWith("*") || reg.startsWith("&")) {
+                reg = reg.substring(1);
+            } else {
+                // keep
+            }
+            regs.add(reg);
+        }
+    });
+    const list = [];
+    for (const reg of regs) {
+        list.push(reg);
+    }
+    return list;
 };
 
 const __main__ = async () => {
@@ -580,12 +649,13 @@ const __main__ = async () => {
     }
     processRegisters(instructions);
     processLabels(instructions);
-    const f = await Deno.open("./a.out", { write: true, create: true, truncate: true });
-    for (const ainst of instructions) {
-        await f.write(ainst.getBytes());
-    }
-    f.close();
-    // console.log(instructions);
+    await Deno.writeFile("./a.out", buildBinary(instructions));
+    // const f = await Deno.open("./a.out", { write: true, create: true, truncate: true });
+    // for (const ainst of instructions) {
+    //     await f.write(ainst.getBytes());
+    // }
+    // f.close();
+    // console.log(getAllRegisters(instructions));
 };
 
 if (import.meta.main) {
