@@ -583,7 +583,7 @@ export const buildBinary = (instructions) => {
         len += part.length;
     }
     return data;
-}
+};
 
 /**
  * get all labels
