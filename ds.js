@@ -127,76 +127,96 @@ const readOptions = (data, initOffset) => {
     return [ offset + 1, options ];
 };
 
-const processFile = async (file, out) => {
-    const data = await Deno.readFile(file);
-    const f = await Deno.open(out, { write: true, create: true, truncate: true });
+class StringFile {
+    constructor () {
+        /** @type {Array<string>} */
+        this.texts = [];
+    }
+    write (str) {
+        this.texts.push(str);
+    }
+    getText () {
+        return this.texts.join("");
+    }
+}
+
+/**
+ * processFileContent
+ * @param {Uint8Array} data 
+ * @returns {string}
+ */
+const disassembleFileContent = (data) => {
+    const f = new StringFile();
     const encoder = new TextEncoder();
     let pc = 0;
     while (pc < data.length) {
-        await f.write(encoder.encode(`${toAddress((pc >> 8) & 0xFF, pc & 0xFF)}: `));
+        f.write(`${toAddress((pc >> 8) & 0xFF, pc & 0xFF)}: `);
         const op = INSTRUCTION_NAMES[ data[ pc ] ];
         pc += 1;
-        await f.write(encoder.encode(`${op}`));
+        f.write(`${op}`);
         if (INST_ZERO_PARAM.includes(op)) {
             // do nothing
         } else if (INST_ONE_REG_PARAM.includes(op)) {
             const reg = data[ pc ];
             pc += 1;
-            await f.write(encoder.encode(` ${toRegister(reg)}`));
+            f.write(` ${toRegister(reg)}`);
         } else if (INST_ONE_ADDR_PARAM.includes(op)) {
             const haddr = data[ pc ];
             pc += 1;
             const laddr = data[ pc ];
             pc += 1;
-            await f.write(encoder.encode(` ${toAddress(haddr, laddr)}`));
+            f.write(` ${toAddress(haddr, laddr)}`);
         } else if (INST_TWO_PARAM.includes(op)) {
             const param1 = data[ pc ];
             pc += 1;
             const param2 = data[ pc ];
             pc += 1;
             if ([ "STOR" ].includes(op)) {
-                await f.write(encoder.encode(` ${toNumber(param1)}`));
+                f.write(` ${toNumber(param1)}`);
             } else {
-                await f.write(encoder.encode(` ${toRegister(param1)}`));
+                f.write(` ${toRegister(param1)}`);
             }
             if ([ "DTIL" ].includes(op)) {
-                await f.write(encoder.encode(` ${toNumber(param2)}`));
+                f.write(` ${toNumber(param2)}`);
             } else {
-                await f.write(encoder.encode(` ${toRegister(param2)}`));
+                f.write(` ${toRegister(param2)}`);
             }
         } else if ([ "TILE" ].includes(op)) {
             const param1 = data[ pc ];
             pc += 1;
-            await f.write(encoder.encode(` ${toNumber(param1)}`));
+            f.write(` ${toNumber(param1)}`);
             for (let i = 0; i < 8; i++) {
                 const d = data[ pc ];
                 pc += 1;
-                await f.write(encoder.encode(` 0x${toNumberHex(d)}`));
+                f.write(` 0x${toNumberHex(d)}`);
             }
         } else if ([ "DTXT" ].includes(op)) {
             const param1 = data[ pc ];
             pc += 1;
-            await f.write(encoder.encode(` ${toRegister(param1)}`));
+            f.write(` ${toRegister(param1)}`);
             const [ pos, text ] = readString(data, pc);
             pc = pos;
-            await f.write(encoder.encode(` "${toProgramString(text)}"`));
+            f.write(` "${toProgramString(text)}"`);
         } else if ([ "DSEL" ].includes(op)) {
             const param1 = data[ pc ];
             pc += 1;
-            await f.write(encoder.encode(` ${toRegister(param1)}`));
+            f.write(` ${toRegister(param1)}`);
             const [ pos, options ] = readOptions(data, pc);
             pc = pos;
             for (const text of options) {
-                await f.write(encoder.encode(` "${toProgramString(text)}"`));
+                f.write(` "${toProgramString(text)}"`);
             }
         }
-        await f.write(encoder.encode("\n"));
+        f.write("\n");
     }
-    f.close();
+    return f.getText();
 };
 
 const __main__ = async () => {
-    await processFile(Deno.args[ 0 ], "./a.txt");
+    const file_content = await Deno.readFile(Deno.args[ 0 ]);
+    const data = disassembleFileContent(file_content);
+    const encoded = new TextEncoder();
+    await Deno.writeFile("./a.txt", encoded.encode(data));
 };
 
 if (import.meta.main) {

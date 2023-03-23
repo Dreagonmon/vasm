@@ -142,6 +142,16 @@ const assertAndParseAsciiString = (text) => {
     }
 };
 
+class VASMCompileError extends Error {
+    constructor () {
+        super();
+        /** @type {Array<number>} */
+        this.lines = [];
+        /** @type {Array<Error>} */
+        this.errors = [];
+    }
+}
+
 class Instruction {
     constructor (tag, _params) {
         this.tag = tag;
@@ -460,12 +470,12 @@ const process_line = (text, instructions) => {
 
 /**
  * read file into instructions
- * @param {string} file 
+ * @param {string} file_content 
  * @param {Array<Instruction>} instructions 
  */
-const processFile = async (file, instructions) => {
-    const decoder = new TextDecoder("utf-8");
-    const file_content = decoder.decode(await Deno.readFile(file));
+const processFileContent = (file_content, instructions) => {
+    const eLineNum = [];
+    const eError = [];
     let hasError = false;
     let line = 1;
     for (const value of file_content.split("\n")) {
@@ -476,15 +486,18 @@ const processFile = async (file, instructions) => {
             try {
                 process_line(text_line, instructions);
             } catch (err) {
-                console.error(`> Line ${line}: ${err}`);
-                console.error(`  at (file://${await Deno.realPath(file)}:${line}:0)`);
+                eLineNum.push(line);
+                eError.push(err);
                 hasError = true;
             }
         }
         line += 1;
     }
     if (hasError) {
-        throw new Error("> There some errors, abort.");
+        const err = new VASMCompileError();
+        err.lines = eLineNum;
+        err.errors = eError;
+        throw err;
     }
 };
 
@@ -550,25 +563,28 @@ const processLabels = (instructions) => {
     });
 };
 
-/**
- * write to file
- * @param {Array<Instruction>} instructions
- * @param {string} file
- */
-const writeToFile = async (instructions, file) => {
-    const f = await Deno.open(file, { write: true, create: true, truncate: true });
+const __main__ = async () => {
+    const instructions = [];
+    const decoder = new TextDecoder("utf-8");
+    const file_content = decoder.decode(await Deno.readFile(Deno.args[ 0 ]));
+    try {
+        processFileContent(file_content, instructions);
+    } catch (err) {
+        console.log("error");
+        for (let i = 0; i < err.lines.length; i++) {
+            const line = err.lines[ i ];
+            const errMsg = err.errors[ i ];
+            console.error(`> Line ${line}: ${errMsg}`);
+            console.error(`  at (file://${await Deno.realPath(Deno.args[ 0 ])}:${line}:0)`);
+        }
+    }
+    processRegisters(instructions);
+    processLabels(instructions);
+    const f = await Deno.open("./a.out", { write: true, create: true, truncate: true });
     for (const ainst of instructions) {
         await f.write(ainst.getBytes());
     }
     f.close();
-};
-
-const __main__ = async () => {
-    const instructions = [];
-    await processFile(Deno.args[ 0 ], instructions);
-    processRegisters(instructions);
-    processLabels(instructions);
-    await writeToFile(instructions, "./a.out");
     // console.log(instructions);
 };
 

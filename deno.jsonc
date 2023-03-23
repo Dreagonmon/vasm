@@ -1,7 +1,7 @@
 {
     "tasks": {
-        "devas": "deno run --allow-read=test.s --allow-write=a.out as.js test.s",
-        "devds": "deno run --allow-read=a.out --allow-write=a.txt ds.js a.out"
+        "devas": "deno run --allow-read --allow-write=a.out as.js test.s",
+        "devds": "deno run --allow-read --allow-write=a.txt ds.js a.out"
     },
     "lint": {
         "files": {
