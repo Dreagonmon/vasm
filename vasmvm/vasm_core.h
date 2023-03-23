@@ -51,6 +51,7 @@
 #define DNUM 0x17
 #define DTXT 0x18
 #define DSEL 0x19
+#define RAND 0x1A
 
 void vasm_init(
     uint8_t register_buffer[REGISTER_COUNT],

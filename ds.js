@@ -25,6 +25,7 @@ const INSTRUCTION_NAMES = [
     "DNUM",
     "DTXT",
     "DSEL",
+    "RAND",
 ];
 const INST_ZERO_PARAM = [
     "NOPE",
@@ -36,6 +37,7 @@ const INST_ZERO_PARAM = [
     "LOAD",
     "INVI",
     "RETN",
+    "RAND",
 ];
 const INST_ONE_REG_PARAM = [
     "ADDI",

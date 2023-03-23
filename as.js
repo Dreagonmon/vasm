@@ -33,6 +33,7 @@ const INST_ZERO = [
     "LOAD",
     "INVI",
     "RETN",
+    "RAND",
 ];
 const INST_ONE = [
     "ADDI",
@@ -184,6 +185,7 @@ class InstZero extends Instruction {
             "LOAD": 0x06,
             "INVI": 0x0F,
             "RETN": 0x15,
+            "RAND": 0x1A,
         }[ this.tag ];
         return new Uint8Array([ inst ]);
     }

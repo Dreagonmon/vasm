@@ -1,4 +1,6 @@
-STOR 0x7F rc0
+TICK
+RAND
+MOVE r0 rc0
 CALL ldisp
 STOR 0x80 rc0
 CALL ldisp
@@ -36,5 +38,6 @@ RETN
 ; end of program
 :lreach_end
 NOPE
+EXIT
 :lend
 JUMP lend

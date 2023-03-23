@@ -15,6 +15,9 @@ __attribute__((weak)) uint8_t vasm_wait_key(uint8_t last_key) {
 __attribute__((weak)) void vasm_nope_callback() {
     // empty
 }
+__attribute__((weak)) uint8_t vasm_get_rand(uint8_t seed) {
+    return (1103515245 * seed + 12345) % 0x100;
+}
 
 #define VASM_SAVE_REGISTRT_OFFSET (REGISTER_COUNT - 16)
 const uint8_t VASM_FONT[] = {
@@ -484,6 +487,9 @@ uint8_t vasm_execute_once() {
         wbuf[WORKING_BUFFER_SIZE - 2] = '\0';
         param1 = vasm_select(pos, wbuf);
         set_reg(0, param1);
+        break;
+    case RAND:
+        set_reg(0, vasm_get_rand(get_reg(0)));
         break;
     
     default:

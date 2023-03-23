@@ -175,6 +175,7 @@ void loop(void) {
     while (running) {
         uint8_t ret = vasm_execute_once();
         if (ret == VASM_RETURN_EXIT) {
+            printf("vasm exit.\n");
             exit(0);
         }
         poll_sdl_events();

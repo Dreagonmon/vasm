@@ -20,6 +20,7 @@ void vasm_draw_tile(uint8_t pos, const uint8_t mono_vlsb_data[8]);
 // optional interface
 void vasm_save(const uint8_t data[16]);
 void vasm_load(uint8_t data[16]);
+uint8_t vasm_get_rand(uint8_t seed);
 uint8_t vasm_wait_key(uint8_t last_key);
 void vasm_nope_callback(void);
 
