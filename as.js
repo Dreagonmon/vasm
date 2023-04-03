@@ -531,6 +531,8 @@ export const processRegisters = (instructions) => {
         }
     });
     assert(regs.size <= REGISTER_CAPACITY, "Too many registers.");
+    const sortedRegs = Array.from(regs);
+    sortedRegs.sort();
     // update registers
     let regnum = REGISTER_BASE;
     for (const reg of regs) {
@@ -564,7 +566,7 @@ export const processLabels = (instructions) => {
 };
 
 /**
- * process labels
+ * build binary
  * @param {Array<Instruction>} instructions 
  * @returns {Uint8Array}
  */
@@ -598,11 +600,7 @@ export const getAllLabels = (instructions) => {
             labels.add(inst.label);
         }
     });
-    const list = [];
-    for (const label of labels) {
-        list.push(label);
-    }
-    return list;
+    return Array.from(labels);
 };
 
 /**
@@ -625,11 +623,7 @@ export const getAllRegisters = (instructions) => {
             regs.add(reg);
         }
     });
-    const list = [];
-    for (const reg of regs) {
-        list.push(reg);
-    }
-    return list;
+    return Array.from(regs);
 };
 
 const __main__ = async () => {
