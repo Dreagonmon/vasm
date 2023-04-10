@@ -156,58 +156,98 @@ RETN
 
 ; ==== lf_render_card_top ====
 ; get card value
-; input rc0: card
-; input rc1: pos
-; > r0 rc0 rc1 rc2
-; return rc2: card
+; input rc0: pos
+; input rc1: card
+; > r0 rc0 rc2
+; return rc0: next pos
 :lf_render_card_top
-; ; check empty card
-; MOVE rc0 rc2
-; MOVE rc0 r0
-; STOR 0xFF rc0
-; SUBI rc0
-; JPEZ lz_render_card_empty
-; ; render type
-; MOVE rc2 rc0
-; CALL lf_card_type
-; MOVE rc0 r0
-; STOR 1 rc0
-; JPEZ lz_render_card_type_0
-; SUBI rc0
-; JPEZ lz_render_card_type_1
-; SUBI rc0
-; JPEZ lz_render_card_type_2
-; SUBI rc0
-; JPEZ lz_render_card_type_3
-; :lz_render_card_type_0
-; DTIL rc1 0
-; JUMP lz_render_card_next1
-; :lz_render_card_type_1
-; DTIL rc1 1
-; JUMP lz_render_card_next1
-; :lz_render_card_type_2
-; DTIL rc1 2
-; JUMP lz_render_card_next1
-; :lz_render_card_type_3
-; DTIL rc1 3
-; JUMP lz_render_card_next1
-; ; render value
-; :lz_render_card_next1
-; MOVE rc1 r0
-; STOR 1 rc1
-; ADDI rc1
-; MOVE r0 rc1 ; pos ++
-; MOVE rc2 rc0
-; CALL lf_card_value
-; MOVE rc0 r0
-; ; TODO: render value
-; :lz_render_card_empty
-; DTIL rc1 22
-; MOVE rc1 r0
-; STOR 1 rc1
-; ADDI rc1
-; MOVE r0 rc1 ; pos ++
-; DTIL rc1 23
+; check empty card
+MOVE rc1 rc2 ; backup card
+MOVE rc0 rc1 ; rc1 now is pos
+MOVE rc0 r0
+STOR 0xFF rc0
+SUBI rc0
+JPEZ lz_render_card_top_empty
+; render type
+MOVE rc2 rc0 ; restore card
+CALL lf_card_type
+DTIL rc1 rc0
+; pos++
+MOVE rc1 r0
+STOR 1 rc1
+ADDI rc1
+MOVE r0 rc1
+; render value
+MOVE rc2 rc0 ; restore card
+CALL lf_card_value
+STOR 6 r0
+ADDI rc0
+DTIL rc1 r0
+JUMP lz_render_card_top_return
+:lz_render_card_top_empty
+STOR 22 rc0
+DTIL rc1 rc0
+MOVE rc1 r0
+STOR 1 rc1
+ADDI rc1
+MOVE r0 rc1 ; pos ++
+STOR 23 rc0
+DTIL rc1 rc0
+:lz_render_card_top_return
+; pos++
+MOVE rc1 r0
+STOR 1 rc1
+ADDI rc1
+MOVE r0 rc0 ; rc0 now is pos
+MOVE rc2 rc1 ; restore card
+RETN
+
+; ==== lf_render_card_bottom ====
+; get card value
+; input rc0: pos
+; > r0 rc0
+; return rc0: next pos
+:lf_render_card_bottom
+; render bottom left
+STOR 4 r0
+DTIL rc0 r0
+; pos++
+MOVE rc0 r0
+STOR 1 rc0
+ADDI rc0
+MOVE r0 rc0
+; render bottom right
+STOR 5 r0
+DTIL rc0 r0
+; pos++
+MOVE rc0 r0
+STOR 1 rc0
+ADDI rc0
+MOVE r0 rc0
+RETN
+
+; ==== lf_clear_card_half ====
+; get card value
+; input rc0: pos
+; > r0 rc0
+; return rc0: next pos
+:lf_clear_card_half
+; render bottom left
+STOR 19 r0
+DTIL rc0 r0
+; pos++
+MOVE rc0 r0
+STOR 1 rc0
+ADDI rc0
+MOVE r0 rc0
+; render bottom right
+STOR 19 r0
+DTIL rc0 r0
+; pos++
+MOVE rc0 r0
+STOR 1 rc0
+ADDI rc0
+MOVE r0 rc0
 RETN
 
 ; ==== lf_init_table ====
@@ -305,10 +345,11 @@ CALL lf_shuffle_table
 NOPE
 STOR 0 r0
 DNUM r0 rtab51
-STOR 16 r0
-DTXT r0 "Press Any Key"
-STOR 1 rc0
-DTIL r0 rc0
+STOR 16 rc0
+STOR 0b00110011 rc1
+CALL lf_render_card_top
+STOR 32 rc0
+CALL lf_render_card_bottom
 ; WKEY
 CALL lf_wait_key_down
 EXIT
