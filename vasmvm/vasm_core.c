@@ -462,7 +462,7 @@ uint8_t vasm_execute_once() {
         pos = get_reg(param1);
         param1 = vasm_code_read(pc++);
         while (param1 > 0) {
-            vasm_put_ch(pos, param1);
+            vasm_put_ch(pos++, param1);
             param1 = vasm_code_read(pc++);
         }
         break;

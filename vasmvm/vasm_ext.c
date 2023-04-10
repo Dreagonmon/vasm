@@ -145,9 +145,9 @@ void init(void) {
     );
     check((int64_t)window - 1); // window not null
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-    check((int64_t)renderer - 1); // window not null
+    check((int64_t)renderer - 1); // renderer not null
     surface = SDL_GetWindowSurface(window);
-    check((int64_t)surface - 1); // window not null
+    check((int64_t)surface - 1); // surface not null
     white();
     black();
     rect.x = 0;
