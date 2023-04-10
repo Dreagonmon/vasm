@@ -1,43 +1,119 @@
-TICK
-RAND
-MOVE r0 rc0
-CALL ldisp
-STOR 0x80 rc0
-CALL ldisp
-STOR 0x81 rc0
-CALL ldisp
-JUMP lreach_end
+; define tables 52
+STOR 0 rtab00
+STOR 0 rtab01
+STOR 0 rtab02
+STOR 0 rtab03
+STOR 0 rtab04
+STOR 0 rtab05
+STOR 0 rtab06
+STOR 0 rtab07
+STOR 0 rtab08
+STOR 0 rtab09
+STOR 0 rtab10
+STOR 0 rtab11
+STOR 0 rtab12
+STOR 0 rtab13
+STOR 0 rtab14
+STOR 0 rtab15
+STOR 0 rtab16
+STOR 0 rtab17
+STOR 0 rtab18
+STOR 0 rtab19
+STOR 0 rtab20
+STOR 0 rtab21
+STOR 0 rtab22
+STOR 0 rtab23
+STOR 0 rtab24
+STOR 0 rtab25
+STOR 0 rtab26
+STOR 0 rtab27
+STOR 0 rtab28
+STOR 0 rtab29
+STOR 0 rtab30
+STOR 0 rtab31
+STOR 0 rtab32
+STOR 0 rtab33
+STOR 0 rtab34
+STOR 0 rtab35
+STOR 0 rtab36
+STOR 0 rtab37
+STOR 0 rtab38
+STOR 0 rtab39
+STOR 0 rtab40
+STOR 0 rtab41
+STOR 0 rtab42
+STOR 0 rtab43
+STOR 0 rtab44
+STOR 0 rtab45
+STOR 0 rtab46
+STOR 0 rtab47
+STOR 0 rtab48
+STOR 0 rtab49
+STOR 0 rtab50
+STOR 0 rtab51
+; tail position of every columns
+STOR 0 rtabtail0
+STOR 0 rtabtail1
+STOR 0 rtabtail2
+STOR 0 rtabtail3
+STOR 0 rtabtail4
+STOR 0 rtabtail5
+STOR 0 rtabtail6
+STOR 0 rtabtail7
+; define table top
+STOR 0 rtabfree0
+STOR 0 rtabfree1
+STOR 0 rtabfree2
+STOR 0 rtabfree3
+STOR 0 rtabrecv0
+STOR 0 rtabrecv1
+STOR 0 rtabrecv2
+STOR 0 rtabrecv3
+; temporary registers
+STOR 0 rtmp0
+STOR 0 rtmp1
+STOR 0 rtmp2
+STOR 0 rtmp3
+STOR 0 rtmp4
+STOR 0 rtmp5
+STOR 0 rtmp6
+STOR 0 rtmp7
+; program start
+JUMP l_main
 
-; display number and wait for key A
-:ldisp
-STOR 0 rc3
-DNUM rc3 rc0
-:ldisp_wait_key
-GKEY
-MOVE r0 rc0
-; check is key down
-STOR 64 rc3
-DIVI rc3
-STOR 0b01 rc3
-SUBI rc3
-JPEZ ldisp_check_key
-JUMP ldisp_wait_key
-:ldisp_check_key
-; check is key A
-MOVE rc0 r0
-STOR 64 rc3
-MODI rc3
-STOR 0b000001 rc3
-SUBI rc3
-JPEZ ldisp_return
-JUMP ldisp_wait_key
-:ldisp_return
-NOPE
+; ==== lf_card_type ====
+; get card type
+; input rc3: card
+; > r0 
+; return rc1: card type
+:lf_card_type:
+MOVE rc3 r0
+STOR 0b0100 rc1
+MODI rc1 ; & 0b11
+MOVE r0 rc1
+RETN
+
+; ==== lf_card_value ====
+; get card value
+; input rc3: card
+; > r0 
+; return rc2: card value
+:lf_card_value:
+MOVE rc3 r0
+STOR 0b0100 rc2
+DIVI rc2 ; >> 2
+STOR 0b01000000 rc2
+MODI rc2 ; & 0b11111111
+MOVE r0 rc2
 RETN
 
 ; end of program
-:lreach_end
+:l_main
 NOPE
+DTXT r0 "Press Any Key"
+DTIL r0 0
+WKEY
 EXIT
-:lend
-JUMP lend
+
+:l_end
+JUMP l_end
