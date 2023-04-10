@@ -93,7 +93,13 @@ const toRegister = (num) => {
 
 const toNumber = (num) => { return num.toString(10); };
 
-const toNumberHex = (num) => { return num.toString(16).toUpperCase(); };
+const toNumberHex = (num) => {
+    const text = num.toString(16).toUpperCase();
+    if (text.length == 1) {
+        return "0" + text;
+    }
+    return text;
+};
 
 const toProgramString = (text) => {
     return text.replaceAll("\\", "\\\\")
@@ -176,11 +182,7 @@ const disassembleFileContent = (data) => {
             } else {
                 f.write(` ${toRegister(param1)}`);
             }
-            if ([ "DTIL" ].includes(op)) {
-                f.write(` ${toNumber(param2)}`);
-            } else {
-                f.write(` ${toRegister(param2)}`);
-            }
+            f.write(` ${toRegister(param2)}`);
         } else if ([ "TILE" ].includes(op)) {
             const param1 = data[ pc ];
             pc += 1;

@@ -307,7 +307,8 @@ STOR 0 r0
 DNUM r0 rtab51
 STOR 16 r0
 DTXT r0 "Press Any Key"
-DTIL r0 0
+STOR 1 rc0
+DTIL r0 rc0
 ; WKEY
 CALL lf_wait_key_down
 EXIT

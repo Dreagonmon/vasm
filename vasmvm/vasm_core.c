@@ -443,12 +443,12 @@ uint8_t vasm_execute_once() {
         param1 = vasm_code_read(pc++);
         param2 = vasm_code_read(pc++);
         pos = get_reg(param1);
+        uint16_t tile_offset = get_reg(param2) * 8;
         #ifdef ENABLE_SAFE_CHECK
-        if (param2 >= CALL_STACK_COUNT) {
+        if (tile_offset > TILE_TABLE_SIZE - 8) {
             VASM_PANIC("tile index out of range.\n");
         }
         #endif
-        uint16_t tile_offset = param2 * 8;
         vasm_draw_tile(pos, tile_table + tile_offset);
         break;
     case DNUM:

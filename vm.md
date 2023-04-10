@@ -35,7 +35,7 @@
 * 0x13 JPLZ <2addr> 如果0大于127，跳转到addr处
 * 0x14 CALL <2addr> 跳转到addr处并保存返回地址
 * 0x15 RETN 返回CALL之前的地址
-* 0x16 DTIL <1reg> <1tid> 在reg处绘制图块tid
+* 0x16 DTIL <1reg1> <1reg2> 在reg1处绘制id为erg2的图块
 * 0x17 DNUM <1reg1> <1reg2> 在reg1处绘制reg2
 * 0x18 DTXT <1reg> <Nstr> 绘制文字
 * 0x19 DSEL <1reg> <Nstr>...<1'\0'> 绘制一行选择项，并等待用户选择，存于0
