@@ -7,7 +7,7 @@
     #ifndef VASM_PANIC
         #include <stdio.h>
         #include <stdlib.h>
-        #define VASM_PANIC(info) do { printf(info); exit (1); } while (0)
+        #define VASM_PANIC(info) do { vasm_nope_callback(); printf(info); exit (1); } while (0)
     #endif
 #endif
 

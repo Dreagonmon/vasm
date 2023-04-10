@@ -122,7 +122,7 @@ void vasm_draw_tile(uint8_t pos, const uint8_t mono_vlsb_data[8]) {
 void vasm_nope_callback() {
     printf("NOPE dump:\n");
     printf("==== PC ====\n");
-    printf("0x%04x\n", vasm_get_program_counter());
+    printf("0x%04x\n", vasm_get_program_counter_at_instruction_start());
     printf("==== Registers ====\n");
     printf("      +0 +1 +2 +3 +4 +5 +6 +7 +8 +9 +a +b +c +d +e +f \n");
     for (uint8_t row = 0; row < 8; row ++) {

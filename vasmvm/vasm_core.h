@@ -61,3 +61,4 @@ void vasm_init(
 );
 uint8_t vasm_execute_once(void);
 uint16_t vasm_get_program_counter(void);
+uint16_t vasm_get_program_counter_at_instruction_start(void);

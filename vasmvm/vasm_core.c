@@ -124,6 +124,7 @@ uint8_t *tile_table = NULL;
 uint8_t *wbuf = NULL;
 uint16_t call_stack_top = 0;
 uint16_t pc = 0; // program counter
+uint16_t pc_inst_st = 0; // program counter at instruction start
 uint8_t last_key_status = 0;
 
 static uint8_t parse_key_event(uint8_t key_status) {
@@ -320,6 +321,7 @@ uint8_t vasm_execute_once() {
         VASM_PANIC("vasm not inited.\n");
     }
     #endif
+    pc_inst_st = pc;
     uint8_t inst = vasm_code_read(pc++);
     uint8_t param1 = 0;
     uint8_t param2 = 0;
@@ -503,4 +505,8 @@ uint8_t vasm_execute_once() {
 
 uint16_t vasm_get_program_counter() {
     return pc;
+}
+
+uint16_t vasm_get_program_counter_at_instruction_start() {
+    return pc_inst_st;
 }
