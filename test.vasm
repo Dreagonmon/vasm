@@ -1,3 +1,28 @@
+; tiles
+TILE 0 0xFC 0x02 0x19 0x25 0x49 0x25 0x19 0x01 ; 
+TILE 1 0xFC 0x02 0x31 0x39 0x7D 0x39 0x31 0x01 ; 
+TILE 2 0xFC 0x02 0x11 0x29 0x45 0x29 0x11 0x01 ; 
+TILE 3 0xFC 0x02 0x11 0x59 0x7D 0x59 0x11 0x01 ; 
+TILE 4 0x3F 0x40 0x80 0x80 0x80 0x80 0x80 0x80 ; border bl
+TILE 5 0x80 0x80 0x80 0x80 0x80 0x80 0x40 0x3F ; border br
+TILE 6 0x01 0x79 0x15 0x15 0x79 0x01 0x02 0xFC ; A
+TILE 7 0x01 0x01 0x65 0x55 0x49 0x01 0x02 0xFC ; 2
+TILE 8 0x01 0x01 0x55 0x55 0x29 0x01 0x02 0xFC ; 3
+TILE 9 0x01 0x01 0x1D 0x11 0x7D 0x01 0x02 0xFC ; 4
+TILE 10 0x01 0x01 0x5D 0x55 0x25 0x01 0x02 0xFC ; 5
+TILE 11 0x01 0x01 0x79 0x55 0x75 0x01 0x02 0xFC ; 6
+TILE 12 0x01 0x01 0x05 0x65 0x1D 0x01 0x02 0xFC ; 7
+TILE 13 0x01 0x01 0x7D 0x55 0x7D 0x01 0x02 0xFC ; 8
+TILE 14 0x01 0x01 0x5D 0x55 0x3D 0x01 0x02 0xFC ; 9
+TILE 15 0x01 0x7D 0x01 0x7D 0x45 0x7D 0x02 0xFC ; 10
+TILE 16 0x01 0x01 0x45 0x7D 0x05 0x01 0x02 0xFC ; J
+TILE 17 0x01 0x39 0x45 0x25 0x59 0x01 0x02 0xFC ; Q
+TILE 18 0x01 0x7D 0x11 0x29 0x45 0x01 0x02 0xFC ; K
+TILE 19 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 ; empty
+TILE 20 0x00 0x18 0x30 0x7F 0x7F 0x30 0x18 0x00 ; arrow down
+TILE 21 0x00 0x18 0x0C 0xFE 0xFE 0x0C 0x18 0x00 ; arrow up
+TILE 22 0xFC 0x02 0x01 0x01 0x01 0x01 0x01 0x01 ; border tl
+TILE 23 0x01 0x01 0x01 0x01 0x01 0x01 0x02 0xFC ; border tr
 ; define tables 52
 STOR 0 rtab00
 STOR 0 rtab01
@@ -81,39 +106,212 @@ STOR 0 rtmp7
 ; program start
 JUMP l_main
 
+; ==== lf_wait_key_down ====
+; wait key down event
+; input: none
+; > r0 rc0 rc1
+; return rc0: key value between [0, 5)
+:lf_wait_key_down
+:lz_wait_key_down_loop
+    WKEY
+    MOVE r0 rc0
+    STOR 0b01000000 rc1
+    DIVI rc1 ; >> 6
+    STOR 0b01 rc1; EVENT_KEYDOWN
+    SUBI rc1
+    JPEZ lz_wait_key_down_loop_break
+    JUMP lz_wait_key_down_loop
+:lz_wait_key_down_loop_break
+MOVE rc0 r0
+STOR 0b01000000 rc1
+MODI rc1 ; & 0b00111111
+MOVE r0 rc0
+RETN
+
 ; ==== lf_card_type ====
 ; get card type
-; input rc3: card
-; > r0 
-; return rc1: card type
-:lf_card_type:
-MOVE rc3 r0
-STOR 0b0100 rc1
-MODI rc1 ; & 0b11
-MOVE r0 rc1
+; input rc0: card
+; > r0 rc0
+; return rc0: card type
+:lf_card_type
+MOVE rc0 r0
+STOR 0b0100 rc0
+MODI rc0 ; & 0b11
+MOVE r0 rc0
 RETN
 
 ; ==== lf_card_value ====
 ; get card value
-; input rc3: card
-; > r0 
-; return rc2: card value
-:lf_card_value:
-MOVE rc3 r0
-STOR 0b0100 rc2
-DIVI rc2 ; >> 2
-STOR 0b01000000 rc2
-MODI rc2 ; & 0b11111111
-MOVE r0 rc2
+; input rc0: card
+; > r0 rc0
+; return rc0: card value
+:lf_card_value
+MOVE rc0 r0
+STOR 0b0100 rc0
+DIVI rc0 ; >> 2
+STOR 0b01000000 rc0
+MODI rc0 ; & 0b11111111
+MOVE r0 rc0
 RETN
 
-; end of program
+; ==== lf_render_card_top ====
+; get card value
+; input rc0: card
+; input rc1: pos
+; > r0 rc0 rc1 rc2
+; return rc2: card
+:lf_render_card_top
+; ; check empty card
+; MOVE rc0 rc2
+; MOVE rc0 r0
+; STOR 0xFF rc0
+; SUBI rc0
+; JPEZ lz_render_card_empty
+; ; render type
+; MOVE rc2 rc0
+; CALL lf_card_type
+; MOVE rc0 r0
+; STOR 1 rc0
+; JPEZ lz_render_card_type_0
+; SUBI rc0
+; JPEZ lz_render_card_type_1
+; SUBI rc0
+; JPEZ lz_render_card_type_2
+; SUBI rc0
+; JPEZ lz_render_card_type_3
+; :lz_render_card_type_0
+; DTIL rc1 0
+; JUMP lz_render_card_next1
+; :lz_render_card_type_1
+; DTIL rc1 1
+; JUMP lz_render_card_next1
+; :lz_render_card_type_2
+; DTIL rc1 2
+; JUMP lz_render_card_next1
+; :lz_render_card_type_3
+; DTIL rc1 3
+; JUMP lz_render_card_next1
+; ; render value
+; :lz_render_card_next1
+; MOVE rc1 r0
+; STOR 1 rc1
+; ADDI rc1
+; MOVE r0 rc1 ; pos ++
+; MOVE rc2 rc0
+; CALL lf_card_value
+; MOVE rc0 r0
+; ; TODO: render value
+; :lz_render_card_empty
+; DTIL rc1 22
+; MOVE rc1 r0
+; STOR 1 rc1
+; ADDI rc1
+; MOVE r0 rc1 ; pos ++
+; DTIL rc1 23
+RETN
+
+; ==== lf_init_table ====
+; init cards
+; input: none
+; > r0 rc0 rc1 rc2 rc3 rtab**
+; return: none
+:lf_init_table
+; set table top
+STOR 0xFF rtabfree0
+STOR 0xFF rtabfree1
+STOR 0xFF rtabfree2
+STOR 0xFF rtabfree3
+STOR 0xFF rtabrecv0
+STOR 0xFF rtabrecv1
+STOR 0xFF rtabrecv2
+STOR 0xFF rtabrecv3
+; fill table
+STOR 4 rc2 ; card type index
+:lz_init_table_loop_type
+    MOVE rc2 r0
+    STOR 1 rc2
+    SUBI rc2
+    MOVE r0 rc2
+    STOR 13 rc3 ; card value index
+    :lz_init_table_loop_value
+        MOVE rc3 r0
+        STOR 1 rc3
+        SUBI rc3
+        MOVE r0 rc3
+        ; make one card
+        MOVE rc3 r0
+        STOR 0b0100 rc1
+        MULI rc1 ; value << 2
+        ADDI rc2 ; | type
+        MOVE r0 rc0 ; card
+        MOVE rc2 r0
+        STOR 13 rc1
+        MULI rc1
+        ADDI rc3
+        MOVE r0 rc1 ; card index
+        STOR &rtab00 r0
+        ADDI rc1
+        MOVE rc0 *r0 ; store card at index
+        MOVE rc3 r0 ; check loop
+        JPGZ lz_init_table_loop_value
+    MOVE rc2 r0 ; check loop
+    JPGZ lz_init_table_loop_type
+; set column tails
+STOR 7 rtabtail0
+STOR 14 rtabtail1
+STOR 21 rtabtail2
+STOR 28 rtabtail3
+STOR 34 rtabtail4
+STOR 40 rtabtail5
+STOR 46 rtabtail6
+STOR 52 rtabtail7
+RETN
+
+; ==== lf_shuffle_table ====
+; shuffle cards
+; input rc0: random seed
+; > r0 rc0 rc1 rc2 rtab00~rtab51
+; return: none
+:lf_shuffle_table
+STOR 52 rc1 ; loop card index
+:lz_shuffle_table_loop
+MOVE rc1 r0
+STOR 1 rc1
+SUBI rc1
+MOVE r0 rc1
+    ; randomly exchange card
+    MOVE rc0 r0
+    RAND
+    MOVE r0 rc0
+    STOR 52 rc2
+    MODI rc2
+    STOR &rtab00 rc2
+    ADDI rc2
+    MOVE r0 rc2 ; random card address
+    STOR &rtab00 r0
+    ADDI rc1 ; this card address
+    MOVE *r0 rc1
+    MOVE *rc2 *r0
+    MOVE rc1 *rc2
+MOVE rc1 r0
+JPGZ lz_shuffle_table_loop
+RETN
+
 :l_main
+CALL lf_init_table
+TICK
+MOVE r0 rc0 ; random seed
+CALL lf_shuffle_table
 NOPE
+STOR 0 r0
+DNUM r0 rtab51
+STOR 16 r0
 DTXT r0 "Press Any Key"
 DTIL r0 0
-WKEY
+; WKEY
+CALL lf_wait_key_down
 EXIT
 
+; end of program
 :l_end
 JUMP l_end
