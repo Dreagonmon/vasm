@@ -1,3 +1,4 @@
+; VSCode supported icons: https://code.visualstudio.com/api/references/icons-in-labels#icon-listing
 ; tiles
 TILE 0 0xFC 0x02 0x19 0x25 0x49 0x25 0x19 0x01 ; 
 TILE 1 0xFC 0x02 0x31 0x39 0x7D 0x39 0x31 0x01 ; 
@@ -106,11 +107,16 @@ STOR 0 rtmp7
 ; program start
 JUMP l_main
 
-; ==== lf_wait_key_down ====
-; wait key down event
-; input: none
-; > r0 rc0 rc1
-; return rc0: key value between [0, 5)
+;### lf_wait_key_down
+;wait key down event
+;
+;#### Input:  
+;* none
+;
+;#### Output:
+;* rc0: key value between [0, 5)
+;
+;$(info) Effected: r0 rc0 rc1
 :lf_wait_key_down
 :lz_wait_key_down_loop
     WKEY
@@ -128,11 +134,16 @@ MODI rc1 ; & 0b00111111
 MOVE r0 rc0
 RETN
 
-; ==== lf_card_type ====
-; get card type
-; input rc0: card
-; > r0 rc0
-; return rc0: card type
+;### lf_card_type
+;get card type
+;
+;#### Input:
+;* rc0: card
+;
+;#### Output:
+;* rc0: card type
+;
+;$(info) Effected: r0 rc0
 :lf_card_type
 MOVE rc0 r0
 STOR 0b0100 rc0
@@ -140,11 +151,16 @@ MODI rc0 ; & 0b11
 MOVE r0 rc0
 RETN
 
-; ==== lf_card_value ====
-; get card value
-; input rc0: card
-; > r0 rc0
-; return rc0: card value
+;### lf_card_value
+;get card value
+;
+;#### Input:
+;* rc0: card
+;
+;#### Output:
+;* rc0: card value
+;
+;$(info) Effected: r0 rc0
 :lf_card_value
 MOVE rc0 r0
 STOR 0b0100 rc0
@@ -154,12 +170,17 @@ MODI rc0 ; & 0b11111111
 MOVE r0 rc0
 RETN
 
-; ==== lf_render_card_top ====
-; get card value
-; input rc0: pos
-; input rc1: card
-; > r0 rc0 rc2
-; return rc0: next pos
+;### lf_render_card_top
+;render card top
+;
+;#### Input:
+;* rc0: pos
+;* rc1: card
+;
+;#### Output:
+;* rc0: next pos
+;
+;$(info) Effected: r0 rc0 rc2
 :lf_render_card_top
 ; check empty card
 MOVE rc1 rc2 ; backup card
@@ -202,11 +223,16 @@ MOVE r0 rc0 ; rc0 now is pos
 MOVE rc2 rc1 ; restore card
 RETN
 
-; ==== lf_render_card_bottom ====
-; get card value
-; input rc0: pos
-; > r0 rc0
-; return rc0: next pos
+;### lf_render_card_bottom
+;render card bottom
+;
+;#### Input:
+;* rc0: pos
+;
+;#### Output:
+;* rc0: next pos
+;
+;$(info) Effected: r0 rc0
 :lf_render_card_bottom
 ; render bottom left
 STOR 4 r0
@@ -226,11 +252,16 @@ ADDI rc0
 MOVE r0 rc0
 RETN
 
-; ==== lf_clear_card_half ====
-; get card value
-; input rc0: pos
-; > r0 rc0
-; return rc0: next pos
+;### lf_clear_card_half
+;clear half card
+;
+;#### Input:
+;* rc0: pos
+;
+;#### Output:
+;* rc0: next pos
+;
+;$(info) Effected: r0 rc0
 :lf_clear_card_half
 ; render bottom left
 STOR 19 r0
@@ -250,11 +281,16 @@ ADDI rc0
 MOVE r0 rc0
 RETN
 
-; ==== lf_init_table ====
-; init cards
-; input: none
-; > r0 rc0 rc1 rc2 rc3 rtab**
-; return: none
+;### lf_init_table
+;init cards table
+;
+;#### Input:
+;* none
+;
+;#### Output:
+;* none
+;
+;$(info) Effected: r0 rc0 rc1 rc2 rc3 rtab**
 :lf_init_table
 ; set table top
 STOR 0xFF rtabfree0
@@ -307,11 +343,16 @@ STOR 46 rtabtail6
 STOR 52 rtabtail7
 RETN
 
-; ==== lf_shuffle_table ====
-; shuffle cards
-; input rc0: random seed
-; > r0 rc0 rc1 rc2 rtab00~rtab51
-; return: none
+;### lf_shuffle_table
+;shuffle cards table
+;
+;#### Input:
+;* rc0: random seed
+;
+;#### Output:
+;* none
+;
+;$(info) Effected: r0 rc0 rc1 rc2 rtab00~rtab51
 :lf_shuffle_table
 STOR 52 rc1 ; loop card index
 :lz_shuffle_table_loop
@@ -337,12 +378,14 @@ MOVE rc1 r0
 JPGZ lz_shuffle_table_loop
 RETN
 
-:l_main
+:l_main ; main funtion
 CALL lf_init_table
+; get random seed
 TICK
-MOVE r0 rc0 ; random seed
+MOVE r0 rc0
 CALL lf_shuffle_table
 NOPE
+; test below
 STOR 0 r0
 DNUM r0 rtab51
 STOR 16 rc0
